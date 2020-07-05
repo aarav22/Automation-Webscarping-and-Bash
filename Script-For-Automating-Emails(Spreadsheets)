@@ -1,0 +1,46 @@
+
+// This constant is written in column C for rows for which an email
+// has been sent successfully.
+var EMAIL_SENT = 'EMAIL_SENT';
+
+/**
+ * Sends non-duplicate emails with data from the current spreadsheet.
+ */
+function sendEmails2() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var startRow = ; // First row of data to process
+  var numRows = ; // Nuber of rows to process
+  var file = DriveApp.getFileById('');
+  //Fetch the range of cells A2:B3
+  var dataRange = sheet.getRange(startRow, 1, numRows, 4);
+  // Fetch values for each row in the Range.
+  var data = dataRange.getValues();
+  for (var i = 0; i < data.length; ++i) {
+    var row = data[i];
+    var emailAddress = row[0]; // First column
+    var message =  row[1];
+    var htmlBody = "<html><p>" + message + "</p></html>";
+    var emailSent = row[2]; // Third column
+    var subjectName = row[3]; //Fourth column
+    
+    
+    if (emailSent !== EMAIL_SENT && (emailAddress != "" && emailAddress != "No Email")) { // Prevents sending 
+        var subject = "CONNECT WITH " + "(" + row[3] + ")"; // A name in row[3] for personalization
+        MailApp.sendEmail(emailAddress, subject, message, { 
+        'htmlBody': htmlBody,
+        name: '', 
+        attachments: [file.getAs(MimeType.PDF)],
+        cc: ''
+      });
+      
+      sheet.getRange(startRow + i, 3).setValue(EMAIL_SENT);
+      // Make sure the cell is updated right away in case the script is interrupted
+      SpreadsheetApp.flush();
+    } else if (emailAddress == "" || emailAddress == "No Email"){
+      sheet.getRange(startRow + i, 3).setValue("NOT_SENT");
+      // Make sure the cell is updated right away in case the script is interrupted
+      SpreadsheetApp.flush();
+    }
+}
+}
+
